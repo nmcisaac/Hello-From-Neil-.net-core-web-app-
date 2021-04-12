@@ -52,5 +52,5 @@ jobs:
       with:
         app-name: 'neilscoolwebapp'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_0cd536092fb74ef6803a3bc94397b78d }}
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_d84ddaf6071c48d893aabd7de726dbf0 }}
         package: .
