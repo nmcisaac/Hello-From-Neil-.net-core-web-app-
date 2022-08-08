@@ -53,5 +53,5 @@ jobs:
         with:
           app-name: 'neilscoolwebapp'
           slot-name: 'staging'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_6E8C9B950AF045B3AB53280681525F82 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_25367AB823BF4E41BE52612F906D4B28 }}
           package: .
