@@ -1,39 +1,55 @@
-# Docs for the Azure Web Apps Deploy action: https://go.microsoft.com/fwlink/?linkid=2134798
-# More GitHub Actions for Azure: https://go.microsoft.com/fwlink/?linkid=2135048
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Azure App Service - neilscoolwebapp2(Production), Build and deploy DotnetCore app
+name: Build and deploy ASP.Net Core app to Azure Web App - neilscoolwebapp2
 
 on:
   push:
     branches:
       - master
+  workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: windows-latest
+    permissions:
+      contents: read #This is required for actions/checkout
 
     steps:
-    # checkout the repo
-    - name: 'Checkout Github Action'
-      uses: actions/checkout@master
+      - uses: actions/checkout@v4
 
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
 
-    - name: Set up .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: '3.1.301'
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
 
-    - name: Build with dotnet
-      run: dotnet build --configuration Release
+      - name: dotnet publish
+        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 
-    - name: dotnet publish
-      run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: ${{env.DOTNET_ROOT}}/myapp
 
-    - name: Run Azure webapp deploy action using publish profile credentials
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: neilscoolwebapp2
-        slot-name: Production
-        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_D3E62788EE41437D915D116B5BF721AE }}
-        package: ${{env.DOTNET_ROOT}}/myapp
-
+  deploy:
+    runs-on: windows-latest
+    needs: build
+    
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+      
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'neilscoolwebapp2'
+          slot-name: 'Production'
+          package: .
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F6873CC1AE8D4A8083A4F3FAEE3D03D5 }}
